@@ -1,0 +1,26 @@
+flowchart TB
+    LAN["Physical LAN<br/>192.168.1.0/24"]
+
+    subgraph NODES["Kubernetes Node Network"]
+        CP["Control Plane<br/>192.168.1.139"]
+        W1["Worker 01<br/>192.168.1.192"]
+        W2["Worker 02<br/>192.168.1.134"]
+    end
+
+    subgraph PODS["Calico Pod Network<br/>10.244.0.0/16"]
+        P1["Pods on Control Plane"]
+        P2["Pods on Worker 01"]
+        P3["Pods on Worker 02"]
+    end
+
+    LAN --> CP
+    LAN --> W1
+    LAN --> W2
+
+    CP --- P1
+    W1 --- P2
+    W2 --- P3
+
+    P1 <-->|"VXLAN overlay"| P2
+    P1 <-->|"VXLAN overlay"| P3
+    P2 <-->|"VXLAN overlay"| P3
