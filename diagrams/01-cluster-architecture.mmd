@@ -1,0 +1,23 @@
+flowchart TB
+    subgraph PVE["Proxmox VE 8.4"]
+        CP["k8s-control-01<br/>192.168.1.139<br/>Control Plane"]
+        W1["k8s-worker-01<br/>192.168.1.192<br/>Worker"]
+        W2["k8s-worker-02<br/>192.168.1.134<br/>Worker"]
+    end
+
+    subgraph PODNET["Calico Pod Network 10.244.0.0/16"]
+        CPODS["Control-plane Pods"]
+        W1PODS["Worker 01 Pods"]
+        W2PODS["Worker 02 Pods"]
+    end
+
+    CP <-->|"Kubernetes API :6443"| W1
+    CP <-->|"Kubernetes API :6443"| W2
+
+    CP --- CPODS
+    W1 --- W1PODS
+    W2 --- W2PODS
+
+    CPODS <-->|"VXLAN"| W1PODS
+    CPODS <-->|"VXLAN"| W2PODS
+    W1PODS <-->|"VXLAN"| W2PODS
