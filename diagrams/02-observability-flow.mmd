@@ -1,0 +1,18 @@
+flowchart LR
+    subgraph K8S["Kubernetes Nodes"]
+        N1["Control Plane<br/>node_exporter :9100"]
+        N2["Worker 01<br/>node_exporter :9100"]
+        N3["Worker 02<br/>node_exporter :9100"]
+        KSM["kube-state-metrics<br/>NodePort :30080"]
+    end
+
+    subgraph WIN["Windows Docker Desktop"]
+        P["Prometheus :9090"]
+        G["Grafana :3000"]
+    end
+
+    N1 -->|"kubernetes-nodes"| P
+    N2 -->|"kubernetes-nodes"| P
+    N3 -->|"kubernetes-nodes"| P
+    KSM -->|"kubernetes-state"| P
+    P --> G
