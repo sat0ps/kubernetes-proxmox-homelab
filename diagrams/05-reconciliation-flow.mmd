@@ -1,0 +1,10 @@
+flowchart TB
+    C["Git commit on main"] --> F["GitRepository fetch<br/>every 1 minute"]
+    F --> D{"Revision changed?"}
+    D -->|"No"| F
+    D -->|"Yes"| B["Build clusters/homelab<br/>with Kustomize"]
+    B --> H["Apply and wait for health"]
+    H --> P["Prune only declared<br/>managed resources"]
+    P --> V["Verify live state"]
+    V --> C
+    X["Manual drift"] --> H

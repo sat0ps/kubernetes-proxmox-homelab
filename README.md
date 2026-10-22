@@ -7,10 +7,11 @@
 ![Calico](https://img.shields.io/badge/CNI-Calico%20VXLAN-F58220)
 ![Prometheus](https://img.shields.io/badge/Monitoring-Prometheus-E6522C?logo=prometheus&logoColor=white)
 ![Grafana](https://img.shields.io/badge/Dashboards-Grafana-F46800?logo=grafana&logoColor=white)
+![FluxCD](https://img.shields.io/badge/GitOps-FluxCD%20v2.9.6-5468FF?logo=flux)
 
 **Three-node Kubernetes cluster built from scratch on Proxmox with Calico networking and external Prometheus/Grafana observability.**
 
-[Architecture](#architecture) • [Cluster](#cluster-inventory) • [Observability](#observability) • [Build](#build-path) • [Troubleshooting](#troubleshooting) • [Repository](#repository-structure)
+[Architecture](#architecture) • [Cluster](#cluster-inventory) • [GitOps](#gitops) • [Observability](#observability) • [Build](#build-path) • [Troubleshooting](#troubleshooting) • [Repository](#repository-structure)
 
 </div>
 
@@ -143,6 +144,20 @@ The Grafana dashboard export is stored at:
 
 [`monitoring/grafana/kubernetes-homelab-full-overview.json`](monitoring/grafana/kubernetes-homelab-full-overview.json)
 
+## GitOps
+
+GitHub is the source of truth for the explicitly managed Kubernetes workload:
+
+```text
+GitHub main → FluxCD → Kubernetes API → gitops-demo/nginx
+```
+
+Flux `v2.9.6` watches `clusters/homelab`, which includes only the Flux source,
+Flux Kustomization, and the `apps/gitops-demo` manifests. The path excludes
+experiments, existing infrastructure manifests, Calico, and the external
+Prometheus/Grafana configuration. See [`docs/gitops.md`](docs/gitops.md) and
+the GitOps diagrams under [`diagrams/`](diagrams/).
+
 ## Build Path
 
 1. Clone Ubuntu cloud-init template into three Proxmox VMs.
@@ -223,10 +238,19 @@ More detail: [`docs/troubleshooting.md`](docs/troubleshooting.md).
 ├── diagrams/
 │   ├── 01-cluster-architecture.mmd
 │   ├── 02-observability-flow.mmd
-│   └── 03-network-flow.mmd
+│   ├── 03-network-flow.mmd
+│   ├── 04-gitops-flow.mmd
+│   └── 05-reconciliation-flow.mmd
+├── apps/
+│   └── gitops-demo/
+├── clusters/
+│   └── homelab/
+├── infrastructure/
+│   └── README.md
 ├── docs/
 │   ├── architecture-decisions.md
 │   ├── build-notes.md
+│   ├── gitops.md
 │   └── troubleshooting.md
 ├── experiments/
 │   └── cpu-stress.yaml

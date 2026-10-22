@@ -1,0 +1,11 @@
+flowchart LR
+    G["GitHub<br/>sat0ps/kubernetes-proxmox-homelab<br/>main"]
+    S["Flux source-controller<br/>GitRepository/homelab"]
+    K["Flux kustomize-controller<br/>Kustomization/homelab"]
+    A["Kubernetes API"]
+    W["Managed workload<br/>gitops-demo/nginx"]
+
+    G -->|"fetch clusters/homelab"| S
+    S -->|"artifact revision"| K
+    K -->|"apply declared resources"| A
+    A --> W
