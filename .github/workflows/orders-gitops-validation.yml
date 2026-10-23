@@ -1,0 +1,38 @@
+name: Orders GitOps validation
+
+on:
+  pull_request:
+    paths:
+      - "apps/orders/**"
+      - "clusters/homelab/**"
+      - "charts/orders/**"
+      - ".github/workflows/orders-gitops-validation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "apps/orders/**"
+      - "clusters/homelab/**"
+      - "charts/orders/**"
+      - ".github/workflows/orders-gitops-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: v1.37.0
+      - name: Render homelab GitOps tree
+        run: kubectl kustomize ./clusters/homelab > /tmp/homelab.yaml
+      - name: Verify Orders GitOps resources
+        run: |
+          set -euo pipefail
+          grep -q "kind: HelmRelease" /tmp/homelab.yaml
+          grep -q "name: orders" /tmp/homelab.yaml
+          grep -q "name: orders-postgresql" /tmp/homelab.yaml
+          grep -q "namespace: orders" /tmp/homelab.yaml

@@ -1,0 +1,44 @@
+name: Orders Helm validation
+
+on:
+  pull_request:
+    paths:
+      - "charts/orders/**"
+      - ".github/workflows/orders-helm-validation.yml"
+  push:
+    branches: [main]
+    paths:
+      - "charts/orders/**"
+      - ".github/workflows/orders-helm-validation.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Helm
+        uses: azure/setup-helm@v4
+        with:
+          version: v3.18.3
+      - name: Lint chart
+        run: |
+          helm lint ./charts/orders
+          helm lint ./charts/orders -f ./charts/orders/values-onprem.yaml
+          helm lint ./charts/orders -f ./charts/orders/values-aks.yaml
+      - name: Render on-prem
+        run: helm template orders ./charts/orders -f ./charts/orders/values-onprem.yaml > /tmp/orders-onprem.yaml
+      - name: Render AKS
+        run: helm template orders ./charts/orders -f ./charts/orders/values-aks.yaml > /tmp/orders-aks.yaml
+      - name: Verify required resources
+        run: |
+          grep -q "kind: Deployment" /tmp/orders-onprem.yaml
+          grep -q "kind: Service" /tmp/orders-onprem.yaml
+          grep -q "kind: ServiceAccount" /tmp/orders-onprem.yaml
+          grep -q "kind: NetworkPolicy" /tmp/orders-onprem.yaml
+          grep -q "kind: Deployment" /tmp/orders-aks.yaml
+          grep -q "kind: Service" /tmp/orders-aks.yaml
+          grep -q "kind: ServiceAccount" /tmp/orders-aks.yaml
+          grep -q "kind: NetworkPolicy" /tmp/orders-aks.yaml
