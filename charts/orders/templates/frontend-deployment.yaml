@@ -31,6 +31,9 @@ spec:
           imagePullPolicy: {{ .Values.frontend.image.pullPolicy }}
           securityContext:
             {{- toYaml .Values.containerSecurityContext | nindent 12 }}
+          env:
+            - name: API_UPSTREAM
+              value: "{{ include "orders.fullname" . }}-api:{{ .Values.api.service.port }}"
           ports:
             - name: http
               containerPort: {{ .Values.frontend.service.targetPort }}
