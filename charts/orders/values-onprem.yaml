@@ -1,0 +1,8 @@
+frontend:
+  replicaCount: 2
+api:
+  replicaCount: 2
+ingress:
+  enabled: false
+networkPolicy:
+  enabled: true
