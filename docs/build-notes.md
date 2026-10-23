@@ -17,6 +17,22 @@
 - Linux metrics: node-exporter on TCP/9100
 - Kubernetes object metrics: kube-state-metrics through NodePort 30080
 
+## Persistent node addresses
+
+The Kubernetes VMs use persistent static addresses inside the guests:
+
+| VM | Hostname | Address |
+|---:|---|---|
+| 150 | k8s-control-01 | 192.168.1.139/24 |
+| 151 | k8s-worker-01 | 192.168.1.192/24 |
+| 152 | k8s-worker-02 | 192.168.1.134/24 |
+
+Each guest has `/etc/netplan/99-k8s-static.yaml` with gateway
+`192.168.1.1` and DNS `192.168.1.1`. Cloud-init network regeneration is
+disabled with `/etc/cloud/cloud.cfg.d/99-disable-network-config.cfg`, so a
+shutdown or reboot does not replace the static configuration with a new DHCP
+lease. Proxmox bridges and VM disks remain unchanged.
+
 ## VM preparation
 
 Three VMs were cloned from an Ubuntu cloud-init template.
