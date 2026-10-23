@@ -9,6 +9,7 @@ spec:
   chart:
     spec:
       chart: ./charts/orders
+      reconcileStrategy: Revision
       sourceRef:
         kind: GitRepository
         name: homelab
