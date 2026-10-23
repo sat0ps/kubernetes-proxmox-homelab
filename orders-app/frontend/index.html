@@ -1,0 +1,26 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Orders</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <main>
+    <h1>Orders</h1>
+    <form id="order-form">
+      <input id="customer" placeholder="Customer" required>
+      <input id="item" placeholder="Item" required>
+      <input id="quantity" type="number" min="1" value="1" required>
+      <button type="submit">Create order</button>
+    </form>
+    <p id="status" role="status"></p>
+    <table>
+      <thead><tr><th>ID</th><th>Customer</th><th>Item</th><th>Quantity</th></tr></thead>
+      <tbody id="orders"></tbody>
+    </table>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
