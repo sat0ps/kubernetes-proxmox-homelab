@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: orders-postgresql
+  namespace: orders
+  labels:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/part-of: orders
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgresql
+      app.kubernetes.io/part-of: orders
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: postgresql
+        app.kubernetes.io/part-of: orders
+    spec:
+      containers:
+        - name: postgresql
+          image: postgres:17.5-alpine3.21
+          env:
+            - name: POSTGRES_DB
+              value: orders
+            - name: POSTGRES_USER
+              value: orders
+            - name: POSTGRES_HOST_AUTH_METHOD
+              value: trust
+          ports:
+            - name: postgresql
+              containerPort: 5432
+          readinessProbe:
+            exec:
+              command: ["pg_isready", "-U", "orders", "-d", "orders"]
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:
+            exec:
+              command: ["pg_isready", "-U", "orders", "-d", "orders"]
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: orders-postgresql
+  namespace: orders
+spec:
+  selector:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/part-of: orders
+  ports:
+    - name: postgresql
+      port: 5432
+      targetPort: postgresql

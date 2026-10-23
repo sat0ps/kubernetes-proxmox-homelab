@@ -1,0 +1,27 @@
+apiVersion: helm.toolkit.fluxcd.io/v2
+kind: HelmRelease
+metadata:
+  name: orders
+  namespace: orders
+spec:
+  interval: 5m
+  releaseName: orders
+  chart:
+    spec:
+      chart: ./charts/orders
+      sourceRef:
+        kind: GitRepository
+        name: homelab
+        namespace: flux-system
+      interval: 5m
+      valuesFiles:
+        - ./charts/orders/values.yaml
+        - ./charts/orders/values-onprem.yaml
+  install:
+    remediation:
+      retries: 3
+  upgrade:
+    remediation:
+      retries: 3
+  rollback:
+    cleanupOnFail: true

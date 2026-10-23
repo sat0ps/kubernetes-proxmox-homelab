@@ -13,6 +13,7 @@ on:
 
 permissions:
   contents: read
+  packages: write
 
 jobs:
   build:
@@ -36,7 +37,9 @@ jobs:
           curl --fail --retry 5 --retry-delay 2 http://localhost:8080/healthz
           curl --fail --retry 5 --retry-delay 2 http://localhost:8080/api/healthz
           curl --fail http://localhost:8080/api/readyz
-          curl --fail -X POST http://localhost:8080/api/orders             -H 'Content-Type: application/json'             -d '{"customer":"CI","item":"Widget","quantity":2}'
+          curl --fail -X POST http://localhost:8080/api/orders \
+            -H 'Content-Type: application/json' \
+            -d '{"customer":"CI","item":"Widget","quantity":2}'
           curl --fail http://localhost:8080/api/orders | grep '"customer":"CI"'
           curl --fail http://localhost:8080/api/metrics | grep orders_api_requests_total
 
@@ -49,3 +52,26 @@ jobs:
         if: always()
         working-directory: orders-app
         run: docker compose down -v
+
+      - name: Log in to GHCR
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Publish immutable and latest images
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: |
+          set -euo pipefail
+          API_REPO="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/orders-api"
+          FRONTEND_REPO="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/orders-frontend"
+          docker tag orders-api:ci "${API_REPO}:sha-${GITHUB_SHA}"
+          docker tag orders-api:ci "${API_REPO}:latest"
+          docker tag orders-frontend:ci "${FRONTEND_REPO}:sha-${GITHUB_SHA}"
+          docker tag orders-frontend:ci "${FRONTEND_REPO}:latest"
+          docker push "${API_REPO}:sha-${GITHUB_SHA}"
+          docker push "${API_REPO}:latest"
+          docker push "${FRONTEND_REPO}:sha-${GITHUB_SHA}"
+          docker push "${FRONTEND_REPO}:latest"
