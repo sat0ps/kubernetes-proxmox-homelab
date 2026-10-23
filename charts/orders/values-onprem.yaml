@@ -1,8 +1,25 @@
 frontend:
   replicaCount: 2
+  image:
+    repository: ghcr.io/sat0ps/orders-frontend
+    tag: latest
+    pullPolicy: Always
 api:
   replicaCount: 2
+  image:
+    repository: ghcr.io/sat0ps/orders-api
+    tag: latest
+    pullPolicy: Always
 ingress:
   enabled: false
 networkPolicy:
   enabled: true
+  database:
+    enabled: true
+    namespaceSelector:
+      matchLabels:
+        kubernetes.io/metadata.name: orders
+    podSelector:
+      matchLabels:
+        app.kubernetes.io/name: postgresql
+    port: 5432
